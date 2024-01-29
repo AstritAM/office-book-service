@@ -1,0 +1,771 @@
+openapi: 3.0.3
+info:
+  title: Система бронирования столов в офисе
+  version: '1.0'
+
+
+tags:
+  - name: office
+    description: CRUD офисов
+  - name: room
+    description: CRUD кабинетов
+  - name: place
+    description: CRUD столов
+  - name: reservation
+    description: Бронорование столов
+
+
+paths:
+
+  /offices:
+    post:
+      tags:
+        - office
+      summary: Добавление офиса
+      description: Добавление нового офиса в бд
+      operationId: createOffice
+      requestBody:
+        description: Данные о офисе для добавления
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Office'
+        required: true
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 7
+    get:
+      tags:
+        - office
+      summary: Получение всех офисов
+      description: Получение данных о всех офисах
+      operationId: getAllOffices
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Office'          
+              
+ 
+  /offices/{officeId}:   
+    delete:
+      tags:
+        - office
+      summary: Удаление данных о офисе
+      operationId: deleteOffices
+      description: Удаление данных о офисе по id
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Офис не найден
+    put:
+      tags:
+        - office
+      summary: Обновление данных о офисе
+      description: Обновиление данных о офисе по id
+      operationId: updateOffice
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Данные о офисе
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Office'
+        required: true
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 12
+        '404':
+          description: Офис не найден
+    get:
+      tags:
+        - office
+      summary: Получение данных о офисе
+      description: Получение данных о офисе по id
+      operationId: getOfficesById
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Office'
+        '404':
+          description: Офис не найден
+  
+  /office/{officeId}/schedule:
+    get:
+      tags:
+        - office
+      summary: Получение расписания офиса
+      description: Получение расписания офиса по id
+      operationId: getOfficeSchedule
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OfficeSchedule'         
+    
+  /offices/{officeId}/search:
+    get:
+      tags:
+        - search
+      summary: Поиск свободных/занятых столов
+      description: Поиск свободных/занятых столов по дате начала и конца
+      operationId: findTable
+      parameters:
+        - in: query
+          name: from_date
+          schema:
+            type: string
+            description: Дата начала в формате Y-m-d H:i:s
+            example: '1963-11-21 11:22:33'
+        - in: query
+          name: to_date
+          schema:
+            type: string
+            description: Дата окончания в формате Y-m-d H:i:s
+            example: '1963-11-22 01:02:01'
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OfficeScheme' 
+                  
+    
+  /offices/{officeId}/rooms:
+    post:
+      tags:
+        - room
+      summary: Добавление данных о кабинете
+      description: Добавление  кабинета
+      operationId: createRoom
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Данные кабинета 
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Room'
+        required: true
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 12     
+    get:
+      tags:
+        - room
+      summary: Получение всех кабинетов
+      description: Получение всех кабинетов
+      operationId: getAllRoom
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Room'          
+            
+  /offices/{officeId}/rooms/{roomId}:
+    put:
+      tags:
+        - room
+      summary: Обновление данных о кабинете
+      description: Обновление данных кабинета по id
+      operationId: updateRoom
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Create a new pet in the store
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Room'
+        required: true
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 12
+                
+        '404':
+          description: Кабинет не найден
+  
+    get:
+      tags:
+        - room
+      summary: Получение данных о кабинете
+      description: Получение данных о кабинете по id
+      operationId: getRoomById
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/Room'          
+            
+        '404':
+          description: Кабинет не найден
+        
+    delete:
+      tags:
+        - room
+      summary: Удаление данных о кабинета
+      description: Удаление кабинета по id
+      operationId: deleteRoom
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Кабинет не найден
+
+
+  /offices/{officeId}/rooms/{roomId}/place:
+    post:
+      tags:
+        - place
+      summary: Добавление стола
+      description: Добавление нового стола
+      operationId: createPlace
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Place'
+        required: true
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 11 
+  
+    get:
+      tags:
+        - place
+      summary: Получение всех столов
+      description: Получение всех столов
+      operationId: getAllPlace
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Place'          
+        
+ 
+  /offices/{officeId}/rooms/{roomId}/place/{placeId}:
+    put:
+      tags:
+        - place
+      summary: Обновление данных о столе
+      description: Обновление данных о столе по id
+      operationId: updatePlace
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: placeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Place'
+        required: true
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Place' 
+        '404':
+          description: Стол не найден
+    delete:
+      tags:
+        - place
+      summary: Удаление данных о столе
+      description: Удаление всех стола по id
+      operationId: deletePlace
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: placeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Стол не найден
+    get:
+      tags:
+        - place
+      summary: Получение данных о столе 
+      description: Получение стола по id
+      operationId: getPlaceById
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: placeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/Place'          
+        '404':
+          description: Стол не найден
+          
+  /reservation:
+    post:
+      tags:
+        - reservation
+      summary: Бронирование стола/кабинета
+      description: Бронирование стола/кабинета
+      operationId: createReservation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reservation'
+        required: true
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 8   
+       
+  
+components:
+  schemas:
+    Office:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        name:
+          type: string
+          description: Название офиса
+          example: r-901
+        location:
+          type: json
+    Room:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 100000
+        officeId:
+          type: integer
+          format: int64
+          example: 100
+        name:
+          type: string
+          example: r-1
+        roomType:
+          type: string
+          description: Тип кабинета
+          example: кабинет
+          enum:
+            - переговорка
+            - кабинет с рабочими местами
+        location:
+          type: json
+    Place:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 100000
+        roomId:
+          type: integer
+          format: int64
+          example: 100
+        number:
+          type: integer
+          format: int64
+          example: 10
+        location:
+          type: json
+    Reservation:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        officeId:
+          type: integer
+          format: int64
+          example: 10
+        roomId:
+          type: integer
+          format: int64
+          example: 100
+        placeId:
+          type: integer
+          format: int64
+          example: 100
+        dateFrom: 
+          type: string
+          format: date-time
+        dateTo:
+          type: string
+          format: date-time
+        typeReservation:
+          type: string
+          description: Тип бронирования
+          example: целиком
+          enum:
+            - целиком
+            - рабочее место
+  
+    StatusPlace:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 100000
+        officeId:
+          type: integer
+          format: int64
+          example: 100
+        name:
+          type: string
+          example: 'r-1'
+        roomType:
+          type: string
+          description: Тип кабинета
+          example: кабинет
+        status:
+          type: string
+          description: Тип бронирования
+          example: занят
+          enum:
+            - занят
+            - свободен
+        location:
+          type: array
+  
+    OfficeSchedule:
+      type: object
+      properties:
+        date: 
+          type: string
+          format: date
+          example: '2023-11-18'
+        start:
+          type: string
+          format: time
+          example: '08:00:00'
+        end:
+          type: string
+          format: time
+          example: '20:00:00'
+        dayFlag:
+          type: string
+          description: Флаг дня(рабочий/нерабочий день)
+          example: рабочий
+          enum:
+            - рабочий
+            - нерабочий
+        officeId:
+            type: integer
+            format: int64
+            example: 10
+
+    OfficeScheme:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 100000
+        name:
+          type: string
+          example: 'r-1'
+        scheme:
+          type: array
+        rooms:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoomScheme' 
+                
+    RoomScheme:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 100000
+        name:
+          type: string
+          example: 'r-1'
+        scheme:
+          type: array
+        status:
+          type: string
+          description: Флаг дня(рабочий/нерабочий день)
+          example: рабочий
+          enum:
+            - рабочий
+            - нерабочий
+        places:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlaceScheme' 
+            
+    PlaceScheme:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 100000
+        name:
+          type: string
+          example: 'r-1'
+        scheme:
+          type: array
+        status:
+          type: string
+          description: Флаг дня(рабочий/нерабочий день)
+          example: рабочий
+          enum:
+            - рабочий
+            - нерабочий
+
+ 
